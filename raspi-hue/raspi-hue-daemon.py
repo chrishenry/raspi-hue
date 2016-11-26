@@ -12,14 +12,13 @@ DAEMON_NAME = 'raspi-hue'
 
 debug_p = True
 
-def do_something(logf):
-    ### This does the "work" of the daemon
+def get_logger(logger_name=DAEMON_NAME):
 
     logger = logging.getLogger(DAEMON_NAME)
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(logf)
-    fh.setLevel(logging.INFO)
+    fh = logging.StreamHandler(sys.stdout)
+    fh.setLevel(logging.DEBUG)
 
     formatstr = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(formatstr)
@@ -28,6 +27,13 @@ def do_something(logf):
 
     logger.addHandler(fh)
 
+    return logger
+
+def do_something():
+    ### This does the "work" of the daemon
+
+    logger = get_logger()
+
     while True:
         logger.debug("this is a DEBUG message")
         logger.info("this is an INFO message")
@@ -35,30 +41,34 @@ def do_something(logf):
         time.sleep(5)
 
 
-def start_daemon(pidf, logf):
+def start_daemon(pidf):
     ### This launches the daemon in its context
 
     global debug_p
 
     if debug_p:
         print("eg_daemon: entered run()")
-        print("eg_daemon: pidf = {}    logf = {}".format(pidf, logf))
+        print("eg_daemon: pidf = {}".format(pidf))
         print("eg_daemon: about to start daemonization")
 
-    ### XXX pidfile is a context
-    with daemon.DaemonContext(
-        working_directory='/var/lib/' + DAEMON_NAME,
-        umask=0o002,
-        pidfile=pidfile.TimeoutPIDLockFile(pidf),
-        ) as context:
-        do_something(logf)
+    try:
+        with daemon.DaemonContext(
+            working_directory='/var/lib/' + DAEMON_NAME,
+            stdout=sys.stdout,
+            stderr=sys.stderr,
+            umask=0o002,
+            pidfile=pidfile.TimeoutPIDLockFile(pidf),
+            ) as context:
+            do_something()
+    except Exception as e:
+        print e
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Example daemon in Python")
     parser.add_argument('-p', '--pid-file', default='/var/run/eg_daemon.pid')
-    parser.add_argument('-l', '--log-file', default='/var/log/eg_daemon.log')
 
     args = parser.parse_args()
 
-    start_daemon(pidf=args.pid_file, logf=args.log_file)
+    start_daemon(pidf=args.pid_file)
