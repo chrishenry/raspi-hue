@@ -1,0 +1,8 @@
+version: '2'
+services:
+  daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./raspi-hue/:/code/
