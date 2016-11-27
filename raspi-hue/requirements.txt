@@ -1,6 +1,6 @@
 docutils==0.12
 lockfile==0.12.2
 picamera==1.12
+Pillow==3.4.2
 python-daemon==2.1.2
 virtualenv==15.0.2
-numpy==1.11.2

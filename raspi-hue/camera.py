@@ -1,12 +1,17 @@
 from io import BytesIO
 from time import sleep
 from picamera import PiCamera
+from PIL import Image
 
 def get_image_colors():
 
-    something = get_image_buffer()
+    iobytes = get_image_buffer()
 
-    print something
+    image = Image.open(io.BytesIO(image_data))
+
+    print image
+
+    print image.show()
 
 def get_image_buffer():
 
@@ -18,5 +23,6 @@ def get_image_buffer():
     # Camera warm-up time
     sleep(2)
     camera.capture(my_stream, 'jpeg')
+    camera.close()
 
     return my_stream
