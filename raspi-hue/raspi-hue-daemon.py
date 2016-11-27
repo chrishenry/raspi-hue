@@ -8,7 +8,7 @@ import logging
 import daemon
 from daemon import pidfile
 
-from camera import get_image_colors
+from camera import get_image_colors, get_image
 
 DAEMON_NAME = 'raspi-hue'
 
@@ -37,7 +37,11 @@ def do_something():
     logger = get_logger()
 
     while True:
-        colors = get_image_colors()
+        image = get_image()
+        colors = get_image_colors(image)
+
+        print colors
+
         time.sleep(5)
 
 

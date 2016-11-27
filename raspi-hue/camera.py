@@ -5,15 +5,15 @@ from PIL import Image
 
 def get_image_colors():
 
-    iobytes = get_image_buffer()
-
-    image = Image.open(io.BytesIO(image_data))
+    image = get_image_buffer()
 
     print image
-
     print image.show()
+    print image.histogram()
 
-def get_image_buffer():
+    return image
+
+def get_image():
 
     my_stream = BytesIO()
     camera = PiCamera()
@@ -25,4 +25,4 @@ def get_image_buffer():
     camera.capture(my_stream, 'jpeg')
     camera.close()
 
-    return my_stream
+    return Image.open(my_stream)
