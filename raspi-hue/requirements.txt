@@ -2,5 +2,6 @@ docutils==0.12
 lockfile==0.12.2
 numpy==1.11.2
 opencv-python==3.1.0.3
+picamera==1.12
 python-daemon==2.1.2
 virtualenv==15.0.2

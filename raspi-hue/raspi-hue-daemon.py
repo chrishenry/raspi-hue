@@ -8,6 +8,8 @@ import logging
 import daemon
 from daemon import pidfile
 
+from camera import get_image_colors
+
 DAEMON_NAME = 'raspi-hue'
 
 debug_p = True
@@ -35,9 +37,7 @@ def do_something():
     logger = get_logger()
 
     while True:
-        logger.debug("this is a DEBUG message")
-        logger.info("this is an INFO message")
-        logger.error("this is an ERROR message")
+        colors = get_image_colors()
         time.sleep(5)
 
 
