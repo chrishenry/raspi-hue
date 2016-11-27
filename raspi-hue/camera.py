@@ -1,21 +1,22 @@
-import picamera
-from picamera import BufferIO, PiCamera
+from io import BytesIO
+from time import sleep
+from picamera import PiCamera
 
 def get_image_colors():
 
-    ibuffer = get_image_buffer()
+    something = get_image_buffer()
 
-    print ibuffer
+    print something
 
 def get_image_buffer():
 
+    my_stream = BytesIO()
     camera = PiCamera()
-    try:
-        ibuffer = BufferIO()
-        camera.capture(ibuffer, format='jpeg')
-    except Exception as e:
-        print e
-    finally:
-        camera.close()
 
-    return ibuffer
+    camera.led = False
+    camera.start_preview()
+    # Camera warm-up time
+    sleep(2)
+    camera.capture(my_stream, 'jpeg')
+
+    return my_stream
