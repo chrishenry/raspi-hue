@@ -1,5 +1,5 @@
 import picamera
-from picamera import BufferIO
+from picamera import BufferIO, PiCamera
 
 def get_image_colors():
 
