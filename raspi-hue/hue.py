@@ -30,11 +30,20 @@ def find_hub(cidr='192.168.0.0/28'):
                 return nm[host]
 
 
+def rewrite_config(config_file, ip):
+
+    with open(config_file) as data_file:
+        data = json.load(data_file)
+
+    username = data.values()[0]
+    new_file = {ip: username}
+
+    with open(config_file, 'w') as outfile:
+        json.dump(new_file, outfile)
+
 def get_bridge(retry=True):
 
-    USER_HOME = 'HOME'
-
-    config_file_path = os.path.join(os.getenv(USER_HOME), '.python_hue')
+    config_file_path = os.path.join(os.getenv('HOME'), '.python_hue')
 
     try:
 
@@ -57,7 +66,7 @@ def get_bridge(retry=True):
             raise serr
 
         if retry:
-            os.remove(config_file_path)
+            rewrite_config(config_file_path, find_hub()['addresses']['ipv4'])
             return get_bridge(retry=False)
         else:
             raise serr
@@ -65,7 +74,7 @@ def get_bridge(retry=True):
     except PhueRequestTimeout as e:
 
         if retry:
-            os.remove(config_file_path)
+            rewrite_config(config_file_path, find_hub()['addresses']['ipv4'])
             return get_bridge(retry=False)
         else:
             raise e
@@ -76,6 +85,8 @@ def get_bridge(retry=True):
 def main(argv):
 
     pp = pprint.PrettyPrinter(indent=2)
+
+    hub = find_hub()
 
     b = get_bridge()
 
