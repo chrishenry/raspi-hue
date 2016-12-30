@@ -30,7 +30,7 @@ def find_hub(cidr='192.168.0.0/28'):
                 return nm[host]
 
 
-def get_bridge():
+def get_bridge(retry=True):
 
     USER_HOME = 'HOME'
 
@@ -56,12 +56,20 @@ def get_bridge():
             # Not the error we are looking for, re-raise
             raise serr
 
-        os.remove(config_file_path)
-        return get_bridge()
+        if retry:
+            os.remove(config_file_path)
+            return get_bridge(retry=False)
+        else:
+            raise serr
 
     except PhueRequestTimeout as e:
-        os.remove(config_file_path)
-        return get_bridge()
+
+        if retry:
+            os.remove(config_file_path)
+            return get_bridge(retry=False)
+        else:
+            raise e
+
 
     return b
 
