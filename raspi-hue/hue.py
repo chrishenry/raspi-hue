@@ -3,10 +3,16 @@
 import os
 import sys
 import json
+import errno
 import pprint
 import nmap
 
-from phue import Bridge
+from phue import Bridge, PhueRequestTimeout
+from socket import error as socket_error
+
+import logging
+logging.basicConfig()
+
 
 def find_hub(cidr='192.168.0.0/28'):
 
@@ -30,16 +36,32 @@ def get_bridge():
 
     config_file_path = os.path.join(os.getenv(USER_HOME), '.python_hue')
 
-    if os.path.exists(config_file_path):
-        with open(config_file_path) as data_file:
-            data = json.load(data_file)
-        b = Bridge(data.keys()[0])
+    try:
 
-    else:
-        hub_data = find_hub()
-        b = Bridge(hub_data['addresses']['ipv4'])
+        if os.path.exists(config_file_path):
+            with open(config_file_path) as data_file:
+                data = json.load(data_file)
+            b = Bridge(data.keys()[0])
 
-    b.connect()
+        else:
+            hub_data = find_hub()
+            b = Bridge(hub_data['addresses']['ipv4'])
+
+
+        b.connect()
+        b.get_api()
+
+    except socket_error as serr:
+        if serr.errno != errno.ECONNREFUSED:
+            # Not the error we are looking for, re-raise
+            raise serr
+
+        os.remove(config_file_path)
+        return get_bridge()
+
+    except PhueRequestTimeout as e:
+        os.remove(config_file_path)
+        return get_bridge()
 
     return b
 
