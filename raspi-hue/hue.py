@@ -82,6 +82,12 @@ def get_bridge(retry=True):
 
     return b
 
+def find_group_by_name(groups, name):
+
+    for id, group in groups.iteritems():
+        if group['name'].lower() == name.lower():
+            return id, group
+
 def main(argv):
 
     pp = pprint.PrettyPrinter(indent=2)
@@ -93,15 +99,19 @@ def main(argv):
     bridge_state = b.get_api()
 
     print "bridge_state"
-    pp.pprint(bridge_state)
+    pp.pprint(bridge_state.keys())
+    pp.pprint(bridge_state['lights'])
+    pp.pprint(bridge_state['groups'])
+
+    pp.pprint(find_group_by_name(bridge_state['groups'], 'Living room'))
 
     # lights = b.lights
     # for l in lights:
     #     print(l.name)
 
-    light_objects = b.get_light_objects('id')
-    print "Light objects"
-    pp.pprint(light_objects)
+    # light_objects = b.get_light_objects('id')
+    # print "Light objects"
+    # pp.pprint(light_objects)
 
 
 
