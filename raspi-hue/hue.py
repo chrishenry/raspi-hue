@@ -14,22 +14,6 @@ import logging
 logging.basicConfig()
 
 
-def find_hub(cidr='192.168.0.0/28'):
-
-    PHILIIPS_VENDOR_NAME = 'Philips Lighting BV'
-
-    nm = nmap.PortScanner()
-    nm.scan(hosts=cidr, arguments='-sP', sudo=True)
-
-    if len(nm.all_hosts()) == 0:
-        print nm['nmap']['scaninfo']['error']
-
-    for host in nm.all_hosts():
-        if 'mac' in nm[host]['addresses']:
-            if nm[host]['vendor'].itervalues().next() == PHILIIPS_VENDOR_NAME:
-                return nm[host]
-
-
 def rewrite_config(config_file, ip):
 
     with open(config_file) as data_file:
@@ -88,13 +72,38 @@ def find_group_by_name(groups, name):
         if group['name'].lower() == name.lower():
             return id, group
 
+class RaspiBridge(Bridge):
+
+    PHILIIPS_VENDOR_NAME = 'Philips Lighting BV'
+
+    def __init__(self, ip=None, username=None, config_file_path=None, cidr='192.168.0.0/28'):
+
+        if ip is None:
+            ip = self.find_hub(cidr)
+
+        super(RaspiBridge, self).__init__(ip, username, config_file_path)
+
+
+    def find_hub(self, cidr):
+
+        nm = nmap.PortScanner()
+        nm.scan(hosts=cidr, arguments='-sP', sudo=True)
+
+        if len(nm.all_hosts()) == 0:
+            print nm['nmap']['scaninfo']['error']
+
+        for host in nm.all_hosts():
+            if 'mac' in nm[host]['addresses']:
+                if nm[host]['vendor'].itervalues().next() == self.PHILIIPS_VENDOR_NAME:
+                    return nm[host]['addresses']['ipv4']
+
+
+
 def main(argv):
 
     pp = pprint.PrettyPrinter(indent=2)
 
-    hub = find_hub()
-
-    b = get_bridge()
+    b = RaspiBridge()
 
     bridge_state = b.get_api()
 
